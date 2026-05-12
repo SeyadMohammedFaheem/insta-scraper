@@ -1,0 +1,29 @@
+{
+  "name": "insta-scraper",
+  "version": "1.0.0",
+  "description": "Lightweight Instagram public post scraper — no login, no API, no browser automation",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "scrape": "node src/cli.js",
+    "dev": "node --watch src/index.js",
+    "api": "node src/api.js",
+    "export": "node src/export.js",
+    "export:csv": "node src/export.js --csv"
+  },
+  "keywords": [
+    "instagram",
+    "scraper",
+    "public",
+    "lightweight"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "googleapis": "^171.4.0",
+    "node-cron": "^3.0.3",
+    "playwright": "^1.60.0"
+  }
+}

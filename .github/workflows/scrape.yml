@@ -1,0 +1,38 @@
+name: Instagram to Sheets Scraper
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npx playwright install chromium --with-deps
+
+      - name: Create credentials.json from secret
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          USERNAMES=${{ secrets.USERNAMES || secrets.INSTAGRAM_USERNAME }}
+          GOOGLE_SHEET_ID=${{ secrets.GOOGLE_SHEET_ID }}
+          MAX_POSTS_PER_USER=20
+          EOF
+
+      - name: Run Scraper
+        run: node src/export.js
