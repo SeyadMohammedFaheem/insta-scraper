@@ -312,28 +312,6 @@ export function parseProfilePage(html, username) {
     }
   }
 
-  // Strategy 3: OG meta (single post fallback)
-  const og = extractOGMeta(html);
-  if (og) {
-    const isVideo = og.type === 'video' || og.video;
-    posts.push({
-      postId: '',
-      shortcode: '',
-      username,
-      caption: og.description || og.title || '',
-      type: isVideo ? 'video' : 'image',
-      imageUrls: og.image ? [og.image] : [],
-      videoUrls: og.video ? [og.video] : [],
-      thumbnailUrl: og.image || '',
-      timestamp: '',
-      permalink: og.url || '',
-      likes: 0,
-      comments: 0,
-      isVideo,
-    });
-    logger.debug(`Parsed OG meta for @${username}`);
-  }
-
   return posts;
 }
 

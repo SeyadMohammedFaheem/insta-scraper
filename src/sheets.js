@@ -51,7 +51,7 @@ async function getSheetsClient() {
 function productToRow(product) {
   return [
     product.id || '',
-    product.name || 'Women Clothing',
+    product.name || 'Product',
     product.description || '',
     product.price || '0',
     product.images || '',

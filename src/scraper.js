@@ -45,23 +45,28 @@ async function fetchViaBrowser(username) {
       }
     });
 
-    await page.goto(`https://www.instagram.com/${username}/`, { waitUntil: 'networkidle' });
+    await page.goto(`https://www.instagram.com/${username}/`, { waitUntil: 'load', timeout: 30000 });
     
-    // Wait a bit more for dynamic content
-    await sleep(2000);
+    // 1. Scroll down slightly to trigger the post loading
+    await page.evaluate(() => window.scrollBy(0, 800));
+    await sleep(3000);
 
     if (posts && posts.length) {
       logger.success(`S0 (Browser): Found ${posts.length} posts`);
       return posts;
     }
 
-    // Fallback: Try extracting from page DOM if API interception failed
+    // 2. Fallback: Extract from DOM if interception missed the initial load
     logger.info(`[S0-FB] Browser DOM extraction for @${username}`);
     const html = await page.content();
     const domPosts = parseProfilePage(html, username);
-    if (domPosts.length) {
-      logger.success(`S0-FB: Found ${domPosts.length} posts`);
-      return domPosts;
+    
+    // Filter out posts that don't have a shortcode (these are bio/meta details)
+    const realPosts = domPosts.filter(p => p.shortcode && p.shortcode.length > 2);
+
+    if (realPosts.length) {
+      logger.success(`S0-FB: Found ${realPosts.length} real posts`);
+      return realPosts;
     }
 
   } catch (err) {

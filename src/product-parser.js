@@ -49,7 +49,7 @@ function parseCaption(caption) {
     : lines.find(l => clothingKeywords.test(l)) || '';
 
   const rawName = nameLine.replace(/[^a-zA-Z\s]/g, '').trim();
-  const name = toProperCase(rawName) || 'Women Clothing';
+  const name = toProperCase(rawName) || 'Ethnic Wear';
 
   // 3. Build description from TOP + BOTTOM + DUPATTA
   const topDesc = caption.match(/\_TOP\_?\*?\s*([^\n\*]+)/i)?.[1]?.trim() || '';
@@ -103,9 +103,13 @@ export function parseProduct(post) {
  * Parse all posts into products.
  */
 export function parseAllProducts(posts) {
-  // Filters out reels if requested, but your GAS script said "Only skip reels" 
-  // then checked for type === 'Video'.
   return posts
-    .filter(post => post.type !== 'Video' && post.productType !== 'clips')
+    .filter(post => {
+      // 1. Skip Reels
+      if (post.type === 'Video' || post.productType === 'clips') return false;
+      // 2. Skip posts with no caption/description
+      if (!post.caption || post.caption.trim().length < 5) return false;
+      return true;
+    })
     .map(parseProduct);
 }
