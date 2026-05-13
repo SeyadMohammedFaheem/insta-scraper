@@ -2,7 +2,7 @@ name: Instagram to Sheets Scraper
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Every 6 hours
+    - cron: '0 13,19 * * *'
   workflow_dispatch: # Allows manual trigger
 
 jobs:
