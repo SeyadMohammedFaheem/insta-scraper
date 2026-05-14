@@ -110,7 +110,7 @@ export async function pushToSheets(products, sheetName = 'Sheet1') {
     .filter(p => !existingIds.has(p.id))
     .map(productToRow);
 
-  const finalRows = [HEADERS, ...validRows, ...newRowsToAdd];
+  const finalRows = [HEADERS, ...newRowsToAdd, ...validRows];
 
   // 4. Clear and Update
   try {

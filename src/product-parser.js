@@ -27,19 +27,24 @@ function parseCaption(caption) {
     .filter(l => l.length > 2);
 
   // 1. Price extraction
+  // Improved regex to capture prices more aggressively and handle commas
   const priceMatch =
-    caption.match(/\_RATE\_?\*?\s*(\d{3,4})/i) ||
-    caption.match(/RATE\*?\s*(\d{3,4})/i) ||
-    caption.match(/[Pp]rice[-:\s]*(\d{3,4})/i) ||
-    caption.match(/₹\s*(\d{3,4})/i) ||
-    caption.match(/[Rr]s\.?\s*(\d{3,4})/i) ||           
-    caption.match(/(\d{3,4})\s*\/\-/i) ||               
-    caption.match(/@\s*(\d{3,4})/i) ||                  
-    caption.match(/(\d{3,4})\s*[-\/]\s*(?:free|shipping|\*)/i) ||
-    caption.match(/[-]\s*(\d{3,4})\s*[-\/]/i) ||
-    caption.match(/(?:only|just)\s*(\d{3,4})/i);
+    caption.match(/\_RATE\_?\*?\s*([\d,]{3,5})/i) ||
+    caption.match(/RATE\*?\s*([\d,]{3,5})/i) ||
+    caption.match(/[Pp]rice[-:\s]*([\d,]{3,5})/i) ||
+    caption.match(/[₹Rs\.]+\s*([\d,]{3,5})/i) ||
+    caption.match(/(\d{3,5})\s*\/\-/i) ||               
+    caption.match(/@\s*([\d,]{3,5})/i) ||                  
+    caption.match(/([\d,]{3,5})\s*[-\/]\s*(?:free|shipping|\*)/i) ||
+    caption.match(/[-]\s*([\d,]{3,5})\s*[-\/]/i) ||
+    caption.match(/(?:only|just)\s*([\d,]{3,5})/i);
 
-  const price = priceMatch ? priceMatch[1] : '0';
+  let price = priceMatch ? priceMatch[1].replace(/,/g, '') : '0';
+
+  // Final check: if price is not a number or too small, default to 0
+  if (isNaN(parseInt(price, 10)) || parseInt(price, 10) < 100) {
+    price = '0';
+  }
 
   // 2. Product Name from TOP line or keywords
   const topMatch = caption.match(/\_TOP\_?\*?\s*([^\n\*]+)/i);
@@ -111,5 +116,7 @@ export function parseAllProducts(posts) {
       if (!post.caption || post.caption.trim().length < 5) return false;
       return true;
     })
-    .map(parseProduct);
+    .map(parseProduct)
+    .filter(product => product.price !== '0'); // CRITICAL: NEVER give the pricing as 0
 }
+
