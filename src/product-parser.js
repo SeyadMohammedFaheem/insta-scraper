@@ -28,16 +28,18 @@ function parseCaption(caption) {
 
   // 1. Price extraction
   // Improved regex to capture prices more aggressively and handle commas
+  // Handles: _RATE_ 875, *Rate :- 1370*, RATE* 950, Price-850-/, ₹1299, 950/-, etc.
   const priceMatch =
-    caption.match(/\_RATE\_?\*?\s*([\d,]{3,5})/i) ||
-    caption.match(/RATE\*?\s*([\d,]{3,5})/i) ||
-    caption.match(/[Pp]rice[-:\s]*([\d,]{3,5})/i) ||
-    caption.match(/[₹Rs\.]+\s*([\d,]{3,5})/i) ||
-    caption.match(/(\d{3,5})\s*\/\-/i) ||               
-    caption.match(/@\s*([\d,]{3,5})/i) ||                  
-    caption.match(/([\d,]{3,5})\s*[-\/]\s*(?:free|shipping|\*)/i) ||
-    caption.match(/[-]\s*([\d,]{3,5})\s*[-\/]/i) ||
-    caption.match(/(?:only|just)\s*([\d,]{3,5})/i);
+    caption.match(/\_RATE\_?\*?\s*[:=\-]*\s*([\d,]{3,6})/i) ||
+    caption.match(/RATE\s*\*?\s*[:=\-]*\s*([\d,]{3,6})/i) ||
+    caption.match(/[Pp]rice\s*[-:=\s]*([\d,]{3,6})/i) ||
+    caption.match(/[₹Rs\.]+\s*[:=\-]*\s*([\d,]{3,6})/i) ||
+    caption.match(/(\d{3,6})\s*\/\-/i) ||
+    caption.match(/(\d{3,6})\s*[-\/]\s*(?:free|shipping|\*)/i) ||
+    caption.match(/[-]\s*([\d,]{3,6})\s*[-\/]/i) ||
+    caption.match(/@\s*([\d,]{3,6})/i) ||
+    caption.match(/(?:only|just)\s*([\d,]{3,6})/i) ||
+    caption.match(/(?:mrp|cost)\s*[:=\-]*\s*([\d,]{3,6})/i);
 
   let price = priceMatch ? priceMatch[1].replace(/,/g, '') : '0';
 
@@ -114,6 +116,8 @@ export function parseAllProducts(posts) {
       if (post.type === 'Video' || post.productType === 'clips') return false;
       // 2. Skip posts with no caption/description
       if (!post.caption || post.caption.trim().length < 5) return false;
+      // 3. Skip profile bio / meta posts (no shortcode)
+      if (!post.shortcode || post.shortcode.length < 2) return false;
       return true;
     })
     .map(parseProduct)

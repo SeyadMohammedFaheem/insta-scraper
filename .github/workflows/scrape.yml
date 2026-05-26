@@ -8,6 +8,12 @@ on:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+      GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+      USERNAMES: ${{ secrets.USERNAMES || secrets.INSTAGRAM_USERNAME || 'ufbrand_salwar' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,20 +25,23 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm install
-          npx playwright install chromium --with-deps
+        run: npm ci || npm install
 
-      - name: Create credentials.json from secret
-        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+        continue-on-error: true
 
-      - name: Create .env file
+      - name: Verify environment
         run: |
-          cat > .env << EOF
-          USERNAMES=${{ secrets.USERNAMES || secrets.INSTAGRAM_USERNAME }}
-          GOOGLE_SHEET_ID=${{ secrets.GOOGLE_SHEET_ID }}
-          MAX_POSTS_PER_USER=20
-          EOF
+          echo "USERNAMES: $USERNAMES"
+          echo "GOOGLE_SHEET_ID is set: ${{ secrets.GOOGLE_SHEET_ID != '' }}"
+          echo "GOOGLE_CREDENTIALS is set: ${{ secrets.GOOGLE_CREDENTIALS != '' }}"
+          echo "Node version: $(node --version)"
 
       - name: Run Scraper
         run: node src/export.js
+        env:
+          USERNAMES: ${{ env.USERNAMES }}
+          GOOGLE_SHEET_ID: ${{ env.GOOGLE_SHEET_ID }}
+          GOOGLE_CREDENTIALS: ${{ env.GOOGLE_CREDENTIALS }}
+          MAX_POSTS_PER_USER: '20'

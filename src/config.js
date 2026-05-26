@@ -14,7 +14,10 @@ dotenv.config({ path: path.join(ROOT, '.env') });
 
 const config = {
   /** List of public usernames to scrape */
-  usernames: ['ufbrand_salwar'],
+  usernames: (process.env.USERNAMES || 'ufbrand_salwar')
+    .split(',')
+    .map(u => u.trim())
+    .filter(Boolean),
 
   /** Cron expression for auto-scrape (default: every 6 hrs) */
   cronSchedule: '0 13,19 * * *',

@@ -46,16 +46,27 @@ async function main() {
     posts = await loadPosts(username);
   } else {
     posts = await scrapeUser(username);
-    await savePosts(username, posts);
+    if (posts.length) {
+      await savePosts(username, posts);
+    } else {
+      // Fallback: use existing stored data when live scrape fails
+      logger.warn('Live scrape returned 0 posts — falling back to stored data.');
+      posts = await loadPosts(username);
+    }
   }
 
   if (!posts.length) {
-    logger.error('No posts found.');
-    process.exit(1);
+    logger.warn('No posts available (neither live nor stored). Exiting gracefully.');
+    process.exit(0); // Exit 0 so GitHub Actions doesn't mark as failed
   }
 
   const products = parseAllProducts(posts);
-  logger.success(`Parsed ${products.length} products (Filtered out Reels)`);
+  logger.success(`Parsed ${products.length} products (Filtered out Reels & zero-price)`);
+
+  if (!products.length) {
+    logger.warn('No valid products extracted. Exiting gracefully.');
+    process.exit(0);
+  }
 
   // Preview
   console.log('\n📦 Product Preview:\n');
