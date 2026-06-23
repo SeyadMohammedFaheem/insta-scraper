@@ -49,12 +49,20 @@ async function getSheetsClient() {
 }
 
 function productToRow(product) {
+  let imageFormula = '';
+  if (product.images) {
+    const firstImg = product.images.split(',')[0].trim();
+    if (firstImg) {
+      imageFormula = `=IMAGE("${firstImg}")`;
+    }
+  }
+
   return [
     product.id || '',
     product.name || 'Product',
     product.description || '',
     product.price || '0',
-    product.images || '',
+    imageFormula,
     product.status || 'ACTIVE',
     product.type || 'KURTI',
     product.shortcode || '',

@@ -20,9 +20,11 @@ function html(res, body) {
 
 function dashboardHTML(summary, allPosts) {
   const userCards = Object.entries(allPosts).map(([user, posts]) => {
-    const postItems = posts.slice(0, 20).map(p => `
+    const postItems = posts.slice(0, 20).map(p => {
+      const imgSrc = p.shortcode ? `https://www.instagram.com/p/${p.shortcode}/media/?size=l` : p.thumbnailUrl;
+      return `
       <div class="post-card">
-        ${p.thumbnailUrl ? `<img src="${p.thumbnailUrl}" alt="" loading="lazy" />` : '<div class="no-img">No Image</div>'}
+        ${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy" />` : '<div class="no-img">No Image</div>'}
         <div class="post-info">
           <span class="type-badge ${p.type}">${p.type}</span>
           <p class="caption">${escapeHtml((p.caption || '').slice(0, 120))}${(p.caption?.length || 0) > 120 ? '…' : ''}</p>

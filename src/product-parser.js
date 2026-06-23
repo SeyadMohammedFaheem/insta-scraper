@@ -94,12 +94,28 @@ export function parseProduct(post) {
   const caption = post.caption || '';
   const { name, price, description, type } = parseCaption(caption);
 
+  // Generate a permanent Instagram media URL to prevent CDN expiration
+  const permanentImg = post.shortcode ? `https://www.instagram.com/p/${post.shortcode}/media/?size=l` : null;
+
+  // Gather all images: prioritize permanent link, then the rest
+  let allImages = [];
+  if (permanentImg) allImages.push(permanentImg);
+
+  const scrapedImages = (post.imageUrls && post.imageUrls.length > 0) 
+    ? post.imageUrls 
+    : [post.thumbnailUrl];
+
+  allImages.push(...scrapedImages);
+
+  // Deduplicate and filter out empties
+  allImages = [...new Set(allImages.filter(Boolean))];
+
   return {
     id: post.postId || post.id || '',
     name,
     description,
     price,
-    images: (post.imageUrls || [post.thumbnailUrl]).filter(Boolean).join(','),
+    images: allImages.join(','),
     status: 'ACTIVE',
     type,
     shortcode: post.shortcode || ''

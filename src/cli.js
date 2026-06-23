@@ -8,7 +8,7 @@
 
 import config from './config.js';
 import logger from './logger.js';
-import { scrapeUser, scrapeAll, fetchPostDetail } from './scraper.js';
+import { scrapeUser, scrapeAll } from './scraper.js';
 import { savePosts, saveAll } from './storage.js';
 import { warmSession } from './http.js';
 
